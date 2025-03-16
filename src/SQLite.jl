@@ -435,8 +435,11 @@ function juliatype(handle, col)
     else
         stored_type = juliatype(stored_typeid)
     end
+    print(col, stored_typeid, stored_type)
     decl_typestr = C.sqlite3_column_decltype(handle, col - 1)
+    print("decl_typestr", decl_typestr)
     if decl_typestr != C_NULL
+        print("decl_typestr != C_NULL", juliatype(unsafe_string(decl_typestr), stored_type))
         return juliatype(unsafe_string(decl_typestr), stored_type)
     else
         return stored_type
