@@ -89,6 +89,7 @@ function getvalue(
     if t == C.SQLITE_NULL
         return missing
     elseif strict
+        print("strict ", T, " ", handle, " ", col, " ", sqlitevalue(T, handle, col), "\n")
         return sqlitevalue(T, handle, col)
     else
         TT = juliatype(t) # native SQLite Int, Float, and Text types
