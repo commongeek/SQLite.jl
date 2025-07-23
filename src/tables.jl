@@ -91,12 +91,22 @@ function getvalue(
     elseif strict
         return sqlitevalue(T, handle, col)
     else
-        TT = juliatype(t) # native SQLite Int, Float, and Text types
-        return sqlitevalue(
-            ifelse(TT === Any && !isbitstype(T), T, TT),
-            handle,
-            col,
-        )
+        # direct type mapping without dispatch or decltype
+        if t == C.SQLITE_INTEGER
+            return C.sqlite3_column_int64(handle, col - 1)
+        elseif t == C.SQLITE_FLOAT
+            return C.sqlite3_column_double(handle, col - 1)
+        elseif t == C.SQLITE_TEXT
+            ptr = C.sqlite3_column_text(handle, col - 1)
+            len = C.sqlite3_column_bytes(handle, col - 1)
+            return unsafe_string(Ptr{UInt8}(ptr), len)
+        elseif t == C.SQLITE_BLOB
+            ptr = C.sqlite3_column_blob(handle, col - 1)
+            len = C.sqlite3_column_bytes(handle, col - 1)
+            return unsafe_wrap(Vector{UInt8}, Ptr{UInt8}(ptr), len)
+        else
+            return missing
+        end
     end
 end
 
